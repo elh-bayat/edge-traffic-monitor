@@ -22,14 +22,19 @@ rabbitmq_channel = None
 @app.on_event("startup")
 async def startup():
     global rabbitmq_channel
-    try:
-        connection = await aio_pika.connect_robust(RABBITMQ_URL)
-        channel = await connection.channel()
-        await channel.declare_queue(QUEUE_NAME, durable=True)
-        rabbitmq_channel = channel
-        logger.info("Connected to RabbitMQ")
-    except Exception as e:
-        logger.error(f"RabbitMQ connection failed: {e}")
+    import aio_pika
+    for attempt in range(10):  # Try up to 10 times
+        try:
+            connection = await aio_pika.connect_robust(RABBITMQ_URL)
+            channel = await connection.channel()
+            await channel.declare_queue(QUEUE_NAME, durable=True)
+            rabbitmq_channel = channel
+            logger.info("Connected to RabbitMQ")
+            return
+        except Exception as e:
+            logger.warning(f"RabbitMQ not ready (attempt {attempt+1}/10): {e}")
+            await asyncio.sleep(5)
+    logger.error("Could not connect to RabbitMQ after 10 attempts")
 
 
 @app.get("/health")
