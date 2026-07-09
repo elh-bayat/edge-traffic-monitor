@@ -78,10 +78,10 @@ jobs:
             ${{ env.IMAGE_PREFIX }}/simulator:${{ github.sha }}
 
   scan:
-     name: Security Scan
-     runs-on: ubuntu-latest
-     needs: test
-     continue-on-error: true
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: test
+    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4
