@@ -11,23 +11,19 @@ env:
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/edge-traffic-monitor
 
 jobs:
-
   test:
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
       - name: Install dependencies
         run: |
           pip install -r api/requirements.txt
           pip install pytest httpx
-
       - name: Run tests
         run: pytest tests/ -v
 
@@ -39,17 +35,14 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
-
       - name: Build and push API image
         uses: docker/build-push-action@v5
         with:
@@ -58,7 +51,6 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}/api:latest
             ${{ env.IMAGE_PREFIX }}/api:${{ github.sha }}
-
       - name: Build and push Processor image
         uses: docker/build-push-action@v5
         with:
@@ -67,7 +59,6 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}/processor:latest
             ${{ env.IMAGE_PREFIX }}/processor:${{ github.sha }}
-
       - name: Build and push Simulator image
         uses: docker/build-push-action@v5
         with:
@@ -76,4 +67,3 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}/simulator:latest
             ${{ env.IMAGE_PREFIX }}/simulator:${{ github.sha }}
-
