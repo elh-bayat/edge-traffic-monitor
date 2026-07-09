@@ -65,6 +65,23 @@ services:
       - api
     restart: unless-stopped
 
+  processor:
+    build:
+      context: ./processor
+      dockerfile: Dockerfile
+    container_name: traffic-processor
+    ports:
+      - "8001:8001"
+    environment:
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672/
+      DATABASE_URL: postgresql://traffic_user:traffic_pass@postgres:5432/traffic_db
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:v2.52.0
     container_name: prometheus
