@@ -76,21 +76,20 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}/simulator:latest
             ${{ env.IMAGE_PREFIX }}/simulator:${{ github.sha }}
-
-  scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    continue-on-error: true        
-
+   scan:
+     name: Security Scan
+     runs-on: ubuntu-latest
+     needs: test
+     continue-on-error: true
 
     steps:
-      - name: Run Trivy on API image
-        uses: aquasecurity/trivy-action@master
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.20.0
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/edge-traffic-monitor/api:latest
+          scan-type: 'fs'
+          scan-ref: '.'
           format: table
           exit-code: 0
-          ignore-unfixed: true
           severity: CRITICAL
